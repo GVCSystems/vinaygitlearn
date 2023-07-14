@@ -35,7 +35,7 @@ app.get('/machines-data', (req, res) => {
 app.get('/machines', (req, res) => {
     const sql = ` SELECT Machines.*, MachineData.*
     FROM MachineData
-    JOIN Machines ON MachineData.machineId = Machines.id`;
+    JOIN Machines ON MachineData.machineId = Machines.id where data1 = "Mumbai"` ;
     db.query(sql, (err, result) => {
       if (err) {
         throw err;
