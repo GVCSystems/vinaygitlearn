@@ -3,9 +3,9 @@ const mysql = require('mysql');
 const path = require("path")
 // Create connection to the MySQL database
 const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'Newyork!23',
+  host: '159.89.172.182',
+  user: 'readonly',
+  password: 'read@123Only',
   database: 'vendcom'
 });
 
