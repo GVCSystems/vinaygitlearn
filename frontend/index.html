@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Leaflet Map Example</title>
+    <style>
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+    <script>
+        const timeDiffCheck = (time) => {
+            var givenTime = new Date(time);  // Replace with your given time
+
+            // Get the current time
+            var currentTime = new Date();
+
+            // Calculate the difference in milliseconds between the given time and the current time
+            var diffInMilliseconds = currentTime - givenTime;
+
+            // Convert the difference to minutes
+            var diffInMinutes = Math.floor(diffInMilliseconds / (1000 * 60));
+
+            // Check if the difference is less than 5 minutes
+            if (diffInMinutes < 5) {
+                return true
+            } else {
+                return false
+            }
+
+
+        }
+        let coordinates = []
+        fetch("/machines").then((resp) => resp.json()).then((result) => {
+            console.log({ message: "index: ", result });
+            result.map((ele) => {
+                if (ele.lat && ele.lon) {
+                    let status = "online"
+                    if (timeDiffCheck(ele.updatedAt)) {
+                        status = "online"
+                    }
+
+                    coordinates.push({ ...ele, lat: ele.lat, lng: ele.lon, currentStatus: status },)
+                    console.log({ ...ele, lat: ele.lat, lng: ele.lon, currentStatus: status });
+
+                }
+
+            })
+            initMap()
+
+        })
+        console.log({ message: "index: ", coordinates });
+
+
+        const initMap = () => {
+            // Create a map object and set the initial view
+            var map = L.map('map').setView({ lat: "19.1326123900001", lng: "72.8598202200001" }, 12);
+
+            // Create a tile layer for the street map
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+                maxZoom: 18
+            }).addTo(map);
+
+            // Loop through the coordinates array and create markers for each coordinate
+            for (var i = 0; i < coordinates.length; i++) {
+                console.log({ message: "index: spiral", a: coordinates.spiral_a_status });
+
+                // Define a custom icon for the markers
+                var customIcon = customIcon = L.icon({
+                    iconUrl: '/assets/red.svg',  // Replace with the path to your custom marker image
+                    iconSize: [50, 50],  // Set the size of the custom icon
+                    // popupAnchor: [0, -16]  // Adjust the popup anchor position based on the icon size
+                });
+                if (coordinates[i].currentStatus == "offline") {
+                    customIcon = L.icon({
+                        iconUrl: '/assets/red.svg',  // Replace with the path to your custom marker image
+                        iconSize: [50, 50],  // Set the size of the custom icon
+                        // popupAnchor: [0, -16]  // Adjust the popup anchor position based on the icon size
+                    });
+                } else {
+                    if (coordinates[i].spiral_a_status === 0) {
+                        customIcon = L.icon({
+                            iconUrl: '/assets/light-shade.svg',  // Replace with the path to your custom marker image
+                            iconSize: [50, 50],  // Set the size of the custom icon
+                            // popupAnchor: [0, -16]  // Adjust the popup anchor position based on the icon size
+                        });
+                    }
+                    if (coordinates[i].spiral_a_status === 1) {
+                        customIcon = L.icon({
+                            iconUrl: '/assets/red.svg',  // Replace with the path to your custom marker image
+                            iconSize: [50, 50],  // Set the size of the custom icon
+                            // popupAnchor: [0, -16]  // Adjust the popup anchor position based on the icon size
+                        });
+                    }
+                    if (coordinates[i].spiral_a_status === 2) {
+                        customIcon = L.icon({
+                            iconUrl: '/assets/orange.svg',  // Replace with the path to your custom marker image
+                            iconSize: [50, 50],  // Set the size of the custom icon
+                            // popupAnchor: [0, -16]  // Adjust the popup anchor position based on the icon size
+                        });
+                    }
+                    if (coordinates[i].spiral_a_status === 3) {
+                        customIcon = L.icon({
+                            iconUrl: '/assets/green.svg',  // Replace with the path to your custom marker image
+                            iconSize: [50, 50],  // Set the size of the custom icon
+                            // popupAnchor: [0, -16]  // Adjust the popup anchor position based on the icon size
+                        });
+                    }
+
+                }
+                var marker = L.marker(coordinates[i], { icon: customIcon }).addTo(map);
+
+                var popupContent = `
+                <div class="card popup-card">
+        <div class="card-header popup-header ">
+            <h2 class="card-title">UID: ${coordinates[i].uid}</h2>
+        </div>
+        <div class="card-body popup-body">
+            <p class="card-text"><strong>Machine Id:</strong> ${coordinates[i].machineId}</p>
+            <p class="card-text"><strong>Zone:</strong> ${coordinates[i].zone}</p>
+            <p class="card-text"><strong>Ward:</strong> ${coordinates[i].ward}</p>
+            <p class="card-text"><strong>Beat:</strong> ${coordinates[i].beat}</p>
+        </div>
+    </div>
+`;
+
+                var popup = L.popup({
+                    closeButton: false // Disable the default close
+                }).setContent(popupContent);
+                marker.bindPopup(popup);
+
+                // Custom CSS styles
+                var customPopupStyle = `
+    .popup-card {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #fff;
+        // padding: 10px;
+        max-width: 300px;
+    }
+
+    .popup-header {
+        margin-bottom: 10px;
+    }
+
+    .popup-header h2 {
+        font-size: 18px;
+        margin: 0;
+    }
+
+    .popup-body p {
+        margin: 0;
+        font-size:18px;
+    }
+`;
+
+                // Create a style element and add the custom styles
+                var styleElement = document.createElement('style');
+                styleElement.innerHTML = customPopupStyle;
+                document.head.appendChild(styleElement);
+                // Bind the custom popup to the marker
+                marker.bindPopup(popup);
+
+                // Add a mouseover event listener to open the popup when hovering over the marker
+                marker.on('mouseover', function (e) {
+                    this.openPopup();
+                });
+
+                // Add a mouseout event listener to close the popup when no longer hovering over the marker
+                marker.on('mouseout', function (e) {
+                    this.closePopup();
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>

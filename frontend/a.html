@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Leaflet Map Example with Custom Popup</title>
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
+</head>
+
+<body>
+    <div id="map"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+    <script>
+        // Array of latitude and longitude coordinates
+        var coordinates = [
+            { lat: 40.712776, lng: -74.005974 },
+            { lat: 34.052235, lng: -118.243683 },
+            { lat: 51.5074, lng: -0.1278 }
+        ];
+
+        // Create a map object and set the initial view
+        var map = L.map('map').setView(coordinates[0], 5);
+
+        // Create a tile layer for the street map
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+            maxZoom: 18
+        }).addTo(map);
+
+        // Define a custom icon for the markers
+        var customIcon = L.icon({
+            iconUrl: 'custom-marker.png',  // Replace with the path to your custom marker image
+            iconSize: [32, 32],  // Set the size of the custom icon
+            popupAnchor: [0, -16]  // Adjust the popup anchor position based on the icon size
+        });
+
+        // Loop through the coordinates array and create markers for each coordinate
+        for (var i = 0; i < coordinates.length; i++) {
+            var marker = L.marker(coordinates[i], { icon: customIcon }).addTo(map);
+
+            // Create a custom popup
+            var popupContent = `
+                <h3>Marker ${i + 1}</h3>
+                <p>Custom content for Marker ${i + 1} popup.</p>
+            `;
+            var popup = L.popup().setContent(popupContent);
+
+            // Bind the custom popup to the marker
+            marker.bindPopup(popup);
+
+            // Add a mouseover event listener to open the popup when hovering over the marker
+            marker.on('mouseover', function (e) {
+                this.openPopup();
+            });
+
+            // Add a mouseout event listener to close the popup when no longer hovering over the marker
+            marker.on('mouseout', function (e) {
+                this.closePopup();
+            });
+        }
+    </script>
+</body>
+
+</html>

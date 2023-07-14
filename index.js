@@ -1,0 +1,49 @@
+const express = require('express');
+const mysql = require('mysql');
+const path = require("path")
+// Create connection to the MySQL database
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: 'Newyork!23',
+  database: 'vendcom'
+});
+
+// Connect to the database
+db.connect((err) => {
+  if (err) {
+    throw err;
+  }
+  console.log('Connected to MySQL database');
+});
+
+// Create an Express app
+const app = express();
+
+app.use(express.static(path.join(__dirname, 'frontend')))
+// Create a route to fetch data from the database
+app.get('/machines-data', (req, res) => {
+  const sql = 'SELECT * FROM MachineData';
+  db.query(sql, (err, result) => {
+    if (err) {
+      throw err;
+    }
+    res.json(result);
+  });
+});
+// Create a route to fetch data from the database
+app.get('/machines', (req, res) => {
+    const sql = ` SELECT Machines.*, MachineData.*
+    FROM MachineData
+    JOIN Machines ON MachineData.machineId = Machines.id`;
+    db.query(sql, (err, result) => {
+      if (err) {
+        throw err;
+      }
+      res.json(result);
+    });
+  });
+// Start the server
+app.listen(3000, () => {
+  console.log('Server started on port 3000');
+});
